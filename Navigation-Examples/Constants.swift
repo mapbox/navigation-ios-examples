@@ -72,5 +72,12 @@ let listOfExamples: [NamedController] = [
         controller: CustomServerViewController.self,
         storyboard: nil,
         pushExampleToViewController: false
+    ),
+    (
+        name: "Styled Waypoints",
+        description: "Customize the style of waypoints within a route",
+        controller: StyledWaypointsViewController.self,
+        storyboard: nil,
+        pushExampleToViewController: false
     )
 ]

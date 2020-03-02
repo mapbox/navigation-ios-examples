@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E4DB43E555307E85D094271 /* Pods_Navigation_Examples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 020D595E7751FB434720AACD /* Pods_Navigation_Examples.framework */; };
+		14E99FFE22F802C50096EA27 /* Styled-Waypoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E99FFD22F802C50096EA27 /* Styled-Waypoints.swift */; };
 		8DF510741FEB08F70049DB9C /* Embedded-Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DF510731FEB08F70049DB9C /* Embedded-Navigation.swift */; };
 		8DF510751FEB0CA00049DB9C /* MapboxNavigation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF510761FEB0CA00049DB9C /* MapboxNavigation.framework */; };
 		9613F58522E0306500D34E24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 961FC4E822E0260A00C72877 /* Assets.xcassets */; };
@@ -37,6 +38,7 @@
 /* Begin PBXFileReference section */
 		01D167067A6027DCA4D44BF3 /* Pods-Navigation-Examples-DocsCode.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation-Examples-DocsCode.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Navigation-Examples-DocsCode/Pods-Navigation-Examples-DocsCode.debug.xcconfig"; sourceTree = "<group>"; };
 		020D595E7751FB434720AACD /* Pods_Navigation_Examples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Navigation_Examples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		14E99FFD22F802C50096EA27 /* Styled-Waypoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Styled-Waypoints.swift"; sourceTree = "<group>"; };
 		1E6EDEBB177F0E6643EC4DB9 /* Pods-Navigation-Examples-DocsCode.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation-Examples-DocsCode.release.xcconfig"; path = "Pods/Target Support Files/Pods-Navigation-Examples-DocsCode/Pods-Navigation-Examples-DocsCode.release.xcconfig"; sourceTree = "<group>"; };
 		8D6D36A620001F0400C2B61B /* EmbeddedExamples.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = EmbeddedExamples.storyboard; sourceTree = "<group>"; };
 		8DF510731FEB08F70049DB9C /* Embedded-Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Embedded-Navigation.swift"; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 				C59094C2203E3B9100EB2417 /* Custom-Voice-Controller.swift */,
 				C52BAA772040D5030086EC6B /* Custom-Destination-Marker.swift */,
 				C5C0D63720589422003A3B1D /* Custom-Server.swift */,
+				14E99FFD22F802C50096EA27 /* Styled-Waypoints.swift */,
 			);
 			path = Examples;
 			sourceTree = "<group>";
@@ -468,6 +471,7 @@
 				C5C0D63820589422003A3B1D /* Custom-Server.swift in Sources */,
 				C58FB85C1FE899B800C4B491 /* ViewController.swift in Sources */,
 				C58FB8771FE98B0E00C4B491 /* Waypoint-Arrival-Screen.swift in Sources */,
+				14E99FFE22F802C50096EA27 /* Styled-Waypoints.swift in Sources */,
 				C5F130A61FEB2D7800463E86 /* Advanced.swift in Sources */,
 				C58FB86C1FE89CEC00C4B491 /* ExampleContainerViewController.swift in Sources */,
 				C59094C3203E3B9100EB2417 /* Custom-Voice-Controller.swift in Sources */,
