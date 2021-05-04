@@ -47,9 +47,6 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
             }
         }
         
-        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
-        navigationMapView.addGestureRecognizer(gesture)
-        
         view.addSubview(navigationMapView)
 
         startButton = UIButton()
@@ -66,14 +63,13 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         view.setNeedsLayout()
         
         dateTextField = UITextField(frame: CGRect(x: 75, y: 100, width: 200, height: 35))
-        dateTextField.placeholder = "Enter departure time"
+        dateTextField.placeholder = "Select departure time"
         dateTextField.backgroundColor = UIColor.white
         dateTextField.borderStyle = .roundedRect
         dateTextField.center.x = view.center.x
         dateTextField.isHidden = false
         showDatePicker()
         view.addSubview(dateTextField)
-//        view.addSubview(datePicker)
     }
     
     // Override layout lifecycle callback to be able to style the start button.
@@ -91,7 +87,7 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         if #available(iOS 13.4, *) {
             datePicker.preferredDatePickerStyle = .wheels
         }
-//        datePicker.addTarget(self, action: nil, for: nil)
+
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
 
@@ -106,8 +102,11 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm" // format date correctly
         dateTextField.text = dateFormatter.string(from: datePicker.date)
-        NotificationCenter.default.post(name: .didSetDepartureTime, object: nil, userInfo: ["departureTime": dateTextField.text!])
         self.view.endEditing(true)
+        
+        // only allow user to request route after selecting departure time
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        navigationMapView.addGestureRecognizer(gesture)
     }
     
     @objc func tappedStartButton(sender: UIButton) {
@@ -139,7 +138,8 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         guard let userLocation = navigationMapView.mapView.location.latestLocation else { return }
         let userWaypoint = Waypoint(location: userLocation.internalLocation, heading: userLocation.heading, name: "user")
         let destinationWaypoint = Waypoint(coordinate: destination)
-        let navigationRouteOptions = MopedRouteOptions(waypoints: [userWaypoint, destinationWaypoint])
+        let navigationRouteOptions = MopedRouteOptions(waypoints: [userWaypoint, destinationWaypoint], departTime: dateTextField.text!)
+        
         print("!!! navigationRouteOptions: \(navigationRouteOptions)")
         
         Directions.shared.calculate(navigationRouteOptions) { [weak self] (session, result) in
@@ -166,24 +166,12 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
     }
 }
 
-extension Notification.Name {
-    static let didSetDepartureTime: Notification.Name = .init(rawValue: "didSetDepartureTime")
-}
-
 class MopedRouteOptions: NavigationRouteOptions {
-    var departureTime: String! {
-        didSet {
-            observeNotification()
-        }
-    }
+    var departureTime: String!
     
     override var urlQueryItems: [URLQueryItem] {
 //        let maximumSpeed = Measurement(value: 30, unit: UnitSpeed.milesPerHour)
-        
-//        let hourFromNow = Date().addingTimeInterval(60 * 60) // an hour from now
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm" // format date correctly
-//        let hourFromNowString = dateFormatter.string(from: hourFromNow)
+
         // URLQueryItem(name: "maxspeed", value: String(maximumSpeed.converted(to: .kilometersPerHour).value)),
         let items = [URLQueryItem(name: "depart_at", value: departureTime)]
         print("!!! departure time: \(String(describing: departureTime))")
@@ -195,14 +183,18 @@ class MopedRouteOptions: NavigationRouteOptions {
         }
     }
     
-    func observeNotification() {
-        NotificationCenter.default.addObserver(self, selector: #selector(getDepartureTime), name: .didSetDepartureTime, object: nil)
+    // create initializer to take in the departure time
+    public init(waypoints: [Waypoint], departTime: String){
+        departureTime = departTime
+        super.init(waypoints: waypoints)
     }
     
-    @objc func getDepartureTime(_ notification: Notification) {
-        if let departTime = notification.userInfo?["departureTime"] as? String {
-            departureTime = departTime
-        }
+    required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+    
+    required init(waypoints: [Waypoint], profileIdentifier: DirectionsProfileIdentifier? = .automobileAvoidingTraffic) {
+        fatalError("init(waypoints:profileIdentifier:) has not been implemented")
     }
 }
 
