@@ -24,16 +24,14 @@ class ViewController: UIViewController {
         view.addSubview(navigationMapView)
 
         // Allow the map to display the user's location
-        navigationMapView.showsUserLocation = true
-        
-        // Zoom and center user's location on the map
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            if let coordinate = self.navigationMapView.mapView.locationManager.latestLocation?.coordinate {
-                self.navigationMapView.mapView.cameraManager.setCamera(to: CameraOptions(center: coordinate, zoom: 13),
-                                                                  animated: true,
-                                                                  completion: nil)
-            }
+        navigationMapView.mapView.update {
+            $0.location.puckType = .puck2D()
         }
+        
+        // By default `NavigationViewportDataSource` tracks location changes from `PassiveLocationDataSource`, to consume
+        // raw locations `ViewportDataSourceType` should be set to `.raw`.
+        let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
+        navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
         
         // Add a gesture recognizer to the map view
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
@@ -79,7 +77,7 @@ class ViewController: UIViewController {
         let point = sender.location(in: navigationMapView)
         let coordinate = navigationMapView.mapView.coordinate(for: point)
 
-        if let origin = navigationMapView.mapView.locationManager.latestLocation?.internalLocation.coordinate {
+        if let origin = navigationMapView.mapView.location.latestLocation?.internalLocation.coordinate {
             // Calculate the route from the user's location to the set destination
             calculateRoute(from: origin, to: coordinate)
         } else {

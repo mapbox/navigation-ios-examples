@@ -12,7 +12,7 @@ class RouteAlertsViewController: UIViewController {
         let destination = CLLocationCoordinate2DMake(37.79727245401114, -122.46951395567203)
         let options = NavigationRouteOptions(coordinates: [origin, destination])
         
-        Directions.shared.calculate(options) { [weak self] (session, result) in
+        Directions.shared.calculate(options) { [weak self] (_, result) in
             switch result {
             case .failure(let error):
                 print(error.localizedDescription)

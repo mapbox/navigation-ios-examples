@@ -22,7 +22,7 @@ class AdvancedViewController: UIViewController, NavigationMapViewDelegate, Navig
     var routes: [Route]? {
         didSet {
             guard let routes = routes, let current = routes.first else {
-                navigationMapView.removeRoutes();
+                navigationMapView.removeRoutes()
                 return
             }
             
@@ -44,14 +44,8 @@ class AdvancedViewController: UIViewController, NavigationMapViewDelegate, Navig
         navigationMapView.mapView.update {
             $0.location.puckType = .puck2D()
         }
-        
-        // TODO: Provide a reliable way of setting camera to current coordinate.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            if let coordinate = self.navigationMapView.mapView.location.latestLocation?.coordinate {
-                let cameraOptions = CameraOptions(center: coordinate, zoom: 13.0)
-                self.navigationMapView.mapView.camera.setCamera(to: cameraOptions)
-            }
-        }
+
+        navigationMapView.navigationCamera.viewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
         
         let gesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         navigationMapView.addGestureRecognizer(gesture)
@@ -110,7 +104,7 @@ class AdvancedViewController: UIViewController, NavigationMapViewDelegate, Navig
         let destinationWaypoint = Waypoint(coordinate: destination)
         let navigationRouteOptions = NavigationRouteOptions(waypoints: [userWaypoint, destinationWaypoint])
         
-        Directions.shared.calculate(navigationRouteOptions) { [weak self] (session, result) in
+        Directions.shared.calculate(navigationRouteOptions) { [weak self] (_, result) in
             switch result {
             case .failure(let error):
                 print(error.localizedDescription)

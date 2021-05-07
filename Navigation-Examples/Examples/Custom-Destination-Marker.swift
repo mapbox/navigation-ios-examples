@@ -84,7 +84,7 @@ class CustomDestinationMarkerController: UIViewController {
         
         navigationMapView.mapView.camera.setCamera(to: CameraOptions(center: destination, zoom: 13.0))
         
-        Directions.shared.calculate(navigationRouteOptions) { [weak self] (session, result) in
+        Directions.shared.calculate(navigationRouteOptions) { [weak self] (_, result) in
             switch result {
             case .failure(let error):
                 NSLog("Error occured: \(error.localizedDescription).")

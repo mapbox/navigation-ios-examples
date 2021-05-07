@@ -1,0 +1,9 @@
+included:
+  - Navigation-Examples
+analyzer_rules:
+  - unused_declaration
+  - unused_import
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - function_body_length

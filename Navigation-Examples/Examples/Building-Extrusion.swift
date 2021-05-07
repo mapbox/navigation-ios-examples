@@ -56,7 +56,6 @@ class BuildingExtrusionViewController: UIViewController, NavigationMapViewDelega
             $0.location.puckType = .puck2D()
         }
         
-        // TODO: Provide a reliable way of setting camera to current coordinate.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             if let coordinate = self.navigationMapView.mapView.location.latestLocation?.coordinate {
                 // To make sure that buildings are rendered increase zoomLevel to value which is higher than 16.0.
@@ -71,8 +70,8 @@ class BuildingExtrusionViewController: UIViewController, NavigationMapViewDelega
     
     func setupPerformActionBarButtonItem() {
         let settingsBarButtonItem = UIBarButtonItem(title: NSString(string: "\u{2699}\u{0000FE0E}") as String, style: .plain, target: self, action: #selector(performAction))
-        settingsBarButtonItem.setTitleTextAttributes([.font : UIFont.systemFont(ofSize: 30)], for: .normal)
-        settingsBarButtonItem.setTitleTextAttributes([.font : UIFont.systemFont(ofSize: 30)], for: .highlighted)
+        settingsBarButtonItem.setTitleTextAttributes([.font: UIFont.systemFont(ofSize: 30)], for: .normal)
+        settingsBarButtonItem.setTitleTextAttributes([.font: UIFont.systemFont(ofSize: 30)], for: .highlighted)
         navigationItem.rightBarButtonItem = settingsBarButtonItem
     }
     
@@ -166,7 +165,7 @@ class BuildingExtrusionViewController: UIViewController, NavigationMapViewDelega
     
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         // In case if route is already shown on map do not allow selection of buildings other than final destination.
-        if let _ = currentRoute, let _ = navigationRouteOptions { return }
+        guard currentRoute == nil || navigationRouteOptions == nil else { return }
         navigationMapView.highlightBuildings(at: [navigationMapView.mapView.coordinate(for: gesture.location(in: navigationMapView.mapView))], in3D: true)
     }
 
@@ -197,7 +196,7 @@ class BuildingExtrusionViewController: UIViewController, NavigationMapViewDelega
 
     func requestRoute() {
         let navigationRouteOptions = NavigationRouteOptions(waypoints: waypoints)
-        Directions.shared.calculate(navigationRouteOptions) { [weak self] (session, result) in
+        Directions.shared.calculate(navigationRouteOptions) { [weak self] (_, result) in
             switch result {
             case .failure(let error):
                 self?.presentAlert(message: error.localizedDescription)
@@ -261,7 +260,7 @@ class BuildingExtrusionViewController: UIViewController, NavigationMapViewDelega
 
     func presentAlert(_ title: String? = nil, message: String? = nil) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) in
+        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: { (_) in
             alertController.dismiss(animated: true, completion: nil)
         }))
 

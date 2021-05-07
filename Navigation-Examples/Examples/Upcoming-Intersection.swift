@@ -4,7 +4,7 @@ import MapboxCoreNavigation
 import MapboxMaps
 import Turf
 
-class ObservingElectronicHorizonEventsViewController: UIViewController {
+class ElectronicHorizonEventsViewController: UIViewController {
 
     private lazy var navigationMapView = NavigationMapView(frame: view.bounds)
 
@@ -21,21 +21,12 @@ class ObservingElectronicHorizonEventsViewController: UIViewController {
 
     func setupNavigationMapView() {
         navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        navigationMapView.mapView.locationManager.overrideLocationProvider(with: passiveLocationManager)
+        navigationMapView.mapView.location.overrideLocationProvider(with: passiveLocationManager)
         navigationMapView.mapView.update {
             $0.location.puckType = .puck2D()
         }
         navigationMapView.mapView.on(.styleLoaded) { [weak self] _ in
             self?.setupMostProbablePathStyle()
-        }
-        
-        // TODO: Provide a reliable way of setting camera to current coordinate.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            if let coordinate = self.navigationMapView.mapView.locationManager.latestLocation?.coordinate {
-                // To make sure that buildings are rendered increase zoomLevel to value which is higher than 16.0.
-                // More details can be found here: https://docs.mapbox.com/vector-tiles/reference/mapbox-streets-v8/#building
-                self.navigationMapView.mapView.cameraManager.setCamera(centerCoordinate: coordinate, zoom: 17.0)
-            }
         }
         
         view.addSubview(navigationMapView)
@@ -64,21 +55,21 @@ class ObservingElectronicHorizonEventsViewController: UIViewController {
     }
 
     @objc private func didUpdateElectronicHorizonPosition(_ notification: Notification) {
-        let horizonTreeKey = ElectronicHorizon.NotificationUserInfoKey.treeKey
-        guard let horizonTree = notification.userInfo?[horizonTreeKey] as? ElectronicHorizon else {
+        let horizonTreeKey = RoadGraph.NotificationUserInfoKey.treeKey
+        guard let horizonTree = notification.userInfo?[horizonTreeKey] as? RoadGraph.Edge else {
             return
         }
 
-        let currentStreetName = streetName(for: horizonTree.start)
-        let upcomingCrossStreet = nearestCrossStreetName(from: horizonTree.start)
+        let currentStreetName = streetName(for: horizonTree)
+        let upcomingCrossStreet = nearestCrossStreetName(from: horizonTree)
         updateLabel(currentStreetName: currentStreetName, predictedCrossStreet: upcomingCrossStreet)
 
         // Drawing the most probable path
-        let mostProbablePath = routeLine(from: horizonTree.start, roadGraph: passiveLocationManager.dataSource.roadGraph)
+        let mostProbablePath = routeLine(from: horizonTree, roadGraph: passiveLocationManager.dataSource.roadGraph)
         updateMostProbablePath(with: mostProbablePath)
     }
 
-    private func streetName(for edge: ElectronicHorizon.Edge) -> String? {
+    private func streetName(for edge: RoadGraph.Edge) -> String? {
         let edgeMetadata = passiveLocationManager.dataSource.roadGraph.edgeMetadata(edgeIdentifier: edge.identifier)
         return edgeMetadata?.names.first.map { roadName in
             switch roadName {
@@ -90,9 +81,9 @@ class ObservingElectronicHorizonEventsViewController: UIViewController {
         }
     }
 
-    private func nearestCrossStreetName(from edge: ElectronicHorizon.Edge) -> String? {
+    private func nearestCrossStreetName(from edge: RoadGraph.Edge) -> String? {
         let initialStreetName = streetName(for: edge)
-        var currentEdge: ElectronicHorizon.Edge? = edge
+        var currentEdge: RoadGraph.Edge? = edge
         while let nextEdge = currentEdge?.outletEdges.max(by: { $0.probability < $1.probability }) {
             if let nextStreetName = streetName(for: nextEdge), nextStreetName != initialStreetName {
                 return nextStreetName
@@ -123,9 +114,9 @@ class ObservingElectronicHorizonEventsViewController: UIViewController {
     private let sourceIdentifier = "mpp-source"
     private let layerIdentifier = "mpp-layer"
 
-    private func routeLine(from edge: ElectronicHorizon.Edge, roadGraph: RoadGraph) -> [LocationCoordinate2D] {
+    private func routeLine(from edge: RoadGraph.Edge, roadGraph: RoadGraph) -> [LocationCoordinate2D] {
         var coordinates = [LocationCoordinate2D]()
-        var edge: ElectronicHorizon.Edge? = edge
+        var edge: RoadGraph.Edge? = edge
         while let currentEdge = edge {
             if let shape = roadGraph.edgeShape(edgeIdentifier: currentEdge.identifier) {
                 coordinates.append(contentsOf: shape.coordinates.dropFirst(coordinates.isEmpty ? 0 : 1))

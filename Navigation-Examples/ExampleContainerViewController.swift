@@ -42,13 +42,7 @@ class ExampleContainerViewController: UITableViewController {
     }
     
     private func instantiate<T: UIViewController>(example: T.Type, from storyboard: UIStoryboard? = nil) -> T {
-        if let storyboard = storyboard {
-            let viewController: T = storyboard.instantiateInitialViewController() as! T
-            return viewController
-        } else {
-            let viewController: T = example.init()
-            return viewController
-        }
+        return storyboard?.instantiateInitialViewController() as? T ?? example.init()
     }
     
     private func embed(controller: UIViewController, shouldPush: Bool) {

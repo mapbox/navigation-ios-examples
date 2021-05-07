@@ -1,7 +1,7 @@
 import UIKit
 import MapboxNavigation
 
-protocol CustomBottomBannerViewDelegate: class {
+protocol CustomBottomBannerViewDelegate: AnyObject {
     func customBottomBannerDidCancel(_ banner: CustomBottomBannerView)
 }
 
@@ -63,7 +63,7 @@ class CustomBottomBannerView: UIView {
         initFromNib()
     }
     
-    @IBAction @objc func onCancel(_ sender: Any) {
+    @IBAction func onCancel(_ sender: Any) {
         delegate?.customBottomBannerDidCancel(self)
     }
 }

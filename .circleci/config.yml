@@ -1,5 +1,14 @@
 version: 2.1
 
+step-library:
+  - &install-swiftlint
+       run:
+         name: Install SwiftLint
+         command: |
+          curl -OL "https://github.com/realm/SwiftLint/releases/download/0.43.1/SwiftLint.pkg"
+          echo "e05a054ae15c968ab40bc8537a8afe598ab2d7af  SwiftLint.pkg" | shasum -c -
+          sudo installer -pkg SwiftLint.pkg -target /
+
 jobs:
   build-job:
     parameters:
@@ -25,6 +34,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: pod install
+      - *install-swiftlint
       - run:
           name: Navigation-Examples
           command: xcodebuild -workspace Navigation-Examples.xcworkspace -scheme Navigation-Examples -sdk iphonesimulator -configuration Release -destination "platform=iOS Simulator,name=<< parameters.device >>,OS=<< parameters.ios >>" clean build

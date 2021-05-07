@@ -16,7 +16,7 @@ class WaypointArrivalScreenViewController: UIViewController {
         
         let routeOptions = NavigationRouteOptions(waypoints: [waypointOne, waypointTwo, waypointThree])
         
-        Directions.shared.calculate(routeOptions) { [weak self] (session, result) in
+        Directions.shared.calculate(routeOptions) { [weak self] (_, result) in
             switch result {
             case .failure(let error):
                 print(error.localizedDescription)
@@ -47,7 +47,7 @@ extension WaypointArrivalScreenViewController: NavigationViewControllerDelegate 
         }
         
         let alert = UIAlertController(title: "Arrived at \(waypoint.name ?? "Unknown").", message: "Would you like to continue?", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { action in
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
             // Begin the next leg once the driver confirms
             if !isFinalLeg {
                 navigationViewController.navigationService.routeProgress.legIndex += 1

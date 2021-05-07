@@ -22,7 +22,7 @@ PODS:
     - MapboxMobileEvents (~> 0.10.2)
     - MapboxSpeech-pre (= 2.0.0-alpha.1)
     - Solar (~> 2.1)
-  - MapboxNavigationNative (48.0.4):
+  - MapboxNavigationNative (48.0.5):
     - MapboxCommon (= 11.0.2)
   - MapboxSpeech-pre (2.0.0-alpha.1)
   - Polyline (5.0.2)
@@ -56,10 +56,10 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   MapboxCoreNavigation:
-    :commit: 84a447a84fd0d2cda8213473b6a730ce8bc8d498
+    :commit: 13e14c442649a16498f5d536994eca249ca95f07
     :git: https://github.com/mapbox/mapbox-navigation-ios.git
   MapboxNavigation:
-    :commit: 84a447a84fd0d2cda8213473b6a730ce8bc8d498
+    :commit: 13e14c442649a16498f5d536994eca249ca95f07
     :git: https://github.com/mapbox/mapbox-navigation-ios.git
 
 SPEC CHECKSUMS:
@@ -70,7 +70,7 @@ SPEC CHECKSUMS:
   MapboxMaps: 344401cdffc08060f3d5bc5652d2b667cf36b5fb
   MapboxMobileEvents: 36ff53b135aac486eed94b61f813c7967a0c2c6f
   MapboxNavigation: 5a2aed3bc577fbe4c706a9e1fa740aa99b764835
-  MapboxNavigationNative: 28da14b17e4280dacc0e5041f634c091ac6211d1
+  MapboxNavigationNative: 42d2318b6a6e77cfc3b236799e690e921da4a295
   MapboxSpeech-pre: aeb16de604d07ceb4195150c3359d5401bb298e6
   Polyline: fce41d72e1146c41c6d081f7656827226f643dff
   Solar: 2dc6e7cc39186cb0c8228fa08df76fb50c7d8f24

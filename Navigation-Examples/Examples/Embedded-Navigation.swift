@@ -30,7 +30,7 @@ class EmbeddedExampleViewController: UIViewController {
     }
 
     func calculateDirections() {
-        Directions.shared.calculate(routeOptions) { [weak self] (session, result) in
+        Directions.shared.calculate(routeOptions) { [weak self] (_, result) in
             switch result {
             case .failure(let error):
                 print(error.localizedDescription)

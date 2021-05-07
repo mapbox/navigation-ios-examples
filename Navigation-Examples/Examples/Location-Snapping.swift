@@ -30,7 +30,6 @@ class LocationSnappingViewController: UIViewController {
             $0.location.puckType = .puck2D()
         }
         
-        // TODO: Provide a reliable way of setting camera to current coordinate.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             if let coordinate = self.navigationMapView.mapView.location.latestLocation?.coordinate {
                 let cameraOptions = CameraOptions(center: coordinate, zoom: 17.0)

@@ -5,7 +5,7 @@ typealias NamedController = (
     name: String,
     description: String,
     controller: UIViewController.Type,
-    storyboard: UIStoryboard?, //is the example containined in a storyboard? If so, we assume the Initial View Controller of the storyboard.
+    storyboard: UIStoryboard?, // Is the example containined in a storyboard? If so, we assume the Initial View Controller of the storyboard.
     pushExampleToViewController: Bool // If the example does not go directly into the example,(i.e. another map is shown) set this value to true
 )
 
@@ -129,7 +129,7 @@ let listOfExamples: [NamedController] = [
     (
         name: "Observe electronic horizon events",
         description: "Demonstrates how to use electronic horizon to predict user's most probable path and show upcoming intersections. Simulate Navigation option isn't supported here, instead you can simulate location in Xcode.",
-        controller: ObservingElectronicHorizonEventsViewController.self,
+        controller: ElectronicHorizonEventsViewController.self,
         storyboard: nil,
         pushExampleToViewController: true
     )
