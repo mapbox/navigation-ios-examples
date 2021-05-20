@@ -87,6 +87,7 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         if #available(iOS 13.4, *) {
             datePicker.preferredDatePickerStyle = .wheels
         }
+        datePicker.minimumDate = Date()
 
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
@@ -170,15 +171,28 @@ class MopedRouteOptions: NavigationRouteOptions {
     var departureTime: String!
     
     override var urlQueryItems: [URLQueryItem] {
-//        let maximumSpeed = Measurement(value: 30, unit: UnitSpeed.milesPerHour)
-
+        let maxSpeed = Measurement(value: 30, unit: UnitSpeed.milesPerHour)
+        let maxSpeedString = String(maxSpeed.converted(to: .kilometersPerHour).value)
         // URLQueryItem(name: "maxspeed", value: String(maximumSpeed.converted(to: .kilometersPerHour).value)),
-        let items = [URLQueryItem(name: "depart_at", value: departureTime)]
+        let items = [URLQueryItem(name: "depart_at", value: departureTime), URLQueryItem(name: "maxspeed", value: maxSpeedString)]
         print("!!! departure time: \(String(describing: departureTime))")
-        if let queryItems = super.urlQueryItems as [URLQueryItem]? {
+        if var queryItems = super.urlQueryItems as [URLQueryItem]? {
             print("!!! queryItems: \(queryItems)")
             print()
             print("!!! queryItems + items: \(queryItems + items)")
+            print("!!! QUERYITEMS !!!")
+            for element in queryItems {
+                print(element.name, element.value)
+            }
+            print()
+            print("!!! QUERYITEMS + ITEMS")
+            for element1 in queryItems + items {
+                print(element1.name, " = ", element1.value)
+            }
+//            let i = queryItems.firstIndex(where: { $0.name == "maxSpeed" })
+//            queryItems[i!].value = maxSpeedString
+//            queryItems.filter({ $0.name == "maxspeed"}).first?.value = maxSpeedString
+//            queryItems["maxspeed"].value = maximumSpeed
             return queryItems + items
         }
     }
