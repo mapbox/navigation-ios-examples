@@ -11,7 +11,6 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
     
     // Transition button, progress view
     var stateButton: UIButton!
-//    var tileRegionsTableView: UITableView!
     var stylePackProgressView: UIProgressView!
     var tileRegionProgressView: UIProgressView!
     var downloadRegionsView: UIView!
@@ -54,7 +53,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
     let tileZoom: CGFloat = 12
     let tileAreas: [ToBeTileRegion] = [
         ToBeTileRegion(coordinates: CLLocationCoordinate2D(latitude: 38.907, longitude: -77.036), identifier: "Washington DC Tile Region"),
-        ToBeTileRegion(coordinates: CLLocationCoordinate2D(latitude: 39.289, longitude: -76.613), identifier: "Baltimore Tile Region"),
+        ToBeTileRegion(coordinates: CLLocationCoordinate2D(latitude: 38.997, longitude: -77.027), identifier: "Silver Spring Tile Region"),
         ToBeTileRegion(coordinates: CLLocationCoordinate2D(latitude: 38.805, longitude: -77.046), identifier: "Alexandria Tile Region")
     ]
     let washingtonDCCoord = CLLocationCoordinate2D(latitude: 38.907, longitude: -77.036)
@@ -131,7 +130,6 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
     func setupProgressViews() {
         stylePackProgressView = UIProgressView(frame: CGRect(x: 10, y: 200, width: view.frame.size.width-20, height: 20))
         let stylePackProgressLabel = UILabel(frame: CGRect(x: 10, y: 150, width: view.frame.size.width-20, height: 20))
-        stylePackProgressLabel.bottomAnchor.constraint(equalTo: self.stylePackProgressView.topAnchor)
         stylePackProgressLabel.text = "Style Pack"
         view.addSubview(stylePackProgressView)
         view.addSubview(stylePackProgressLabel)
@@ -139,7 +137,6 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         
         tileRegionProgressView = UIProgressView(frame: CGRect(x: 10, y: 300, width: view.frame.size.width-20, height: 20))
         let tileRegionProgressLabel = UILabel(frame: CGRect(x: 10, y: 250, width: view.frame.size.width-20, height: 20))
-        tileRegionProgressLabel.bottomAnchor.constraint(equalTo: self.tileRegionProgressView.topAnchor)
         tileRegionProgressLabel.text = "Tile Region"
         view.addSubview(tileRegionProgressView)
         view.addSubview(tileRegionProgressLabel)
@@ -150,24 +147,61 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         let refreshRegionsBarButtonItem = UIBarButtonItem(title: NSString(string: "\u{1F5FA}") as String,
                                                     style: .plain,
                                                     target: self,
-                                                    action: #selector(updateRegions))
+                                                    action: #selector(performAction(_:)))
         refreshRegionsBarButtonItem.setTitleTextAttributes([.font: UIFont.systemFont(ofSize: 30)], for: .normal)
         refreshRegionsBarButtonItem.setTitleTextAttributes([.font: UIFont.systemFont(ofSize: 30)], for: .highlighted)
         navigationItem.rightBarButtonItem = refreshRegionsBarButtonItem
     }
     
-//    func setupTileRegionsTableView() {
-//        tileRegionsTableView = UITableView()
-//    }
-//
-// MARK: Offline Regions
-    @objc func updateRegions(_ sender: Any) {
-        refreshOutdatedOfflineRegions()
+    @objc func performAction(_ sender: Any) {
+        let alertController = UIAlertController(title: "Perform action",
+                                                message: "Select specific action to perform it. \n Note: You cannot refresh DC Region after removing it.", preferredStyle: .actionSheet)
+        
+        typealias ActionHandler = (UIAlertAction) -> Void
+        
+        let listRegions: ActionHandler = { _ in self.showDownloadedRegions() }
+        let refreshDCRegion: ActionHandler = { _ in self.updateRegions() }
+        let removeDCRegion: ActionHandler = { _ in self.removeOfflineRegion()}
+        
+        let actions: [(String, UIAlertAction.Style, ActionHandler?)] = [
+            ("List Regions", .default, listRegions),
+            ("Refresh DC Region", .default, refreshDCRegion),
+            ("Remove DC Region", .default, removeDCRegion),
+            ("Cancel", .cancel, nil)
+        ]
+        
+        actions
+            .map({ payload in UIAlertAction(title: payload.0, style: payload.1, handler: payload.2) })
+            .forEach(alertController.addAction(_:))
+        
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = navigationItem.rightBarButtonItem
+        }
+        
+        present(alertController, animated: true, completion: nil)
     }
     
-//    @objc func listRegions(_ sender: Any) {
-//        tileRegionsTableView.isHidden = false
-//    }
+// MARK: Offline Regions
+    func updateRegions() {
+        // Updating a region is done by the same scenario as downloading a new one
+        let tileLoadOptions = TileLoadOptions(
+            criticalPriority: false,
+            acceptExpired: true,
+            networkRestriction: .none)
+        
+        let tileRegionLoadOptions = TileRegionLoadOptions(
+                geometry: MBXGeometry(coordinate: washingtonDCCoord),
+                tileLoadOptions: tileLoadOptions)!
+            
+            tileStore.loadTileRegion(forId: dcRegionIdentifier, loadOptions: tileRegionLoadOptions, completion: { result in
+                switch result {
+                case .success(let region):
+                    print("\(region.id) updated!")
+                case .failure(let error):
+                    print("Error while updating outdated regions: \(error).")
+                }
+            })
+    }
 
     func createCustomTileStore() -> ResourceOptions {
         // get access token
@@ -206,7 +240,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
                 print("Error while downloading style pack: \(error).")
             }
         }
-
+        downloads = [stylePackDownload]
         
         // Create offline regions with tiles
         let navigationOptions = TilesetDescriptorOptions(styleURI: .streets, zoomRange: 0...10)
@@ -217,47 +251,40 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
             criticalPriority: false,
             acceptExpired: true,
             networkRestriction: .none)
-        
-        let tileRegionLoadOptions = TileRegionLoadOptions(
-            geometry: MBXGeometry(coordinate: washingtonDCCoord),
-            descriptors: [navigationDescriptor],
-            metadata: nil,
-            tileLoadOptions: tileLoadOptions,
-            averageBytesPerSecond: nil)!
-                
-        let tileRegionDownload = tileStore.loadTileRegion(forId: dcRegionIdentifier, loadOptions: tileRegionLoadOptions) { [weak self] progress in
-            // Closure gets called from the TileStore thread, so we need to dispatch to the main queue to update the UI.
-            DispatchQueue.main.async {
-                guard let progress = progress,
-                      let tileRegionProgressView = self?.tileRegionProgressView
-                else {
-                    return
+        tileAreas.forEach { region in
+            let tileRegionLoadOptions = TileRegionLoadOptions(
+                geometry: MBXGeometry(coordinate: region.coordinates),
+                descriptors: [navigationDescriptor],
+                metadata: nil,
+                tileLoadOptions: tileLoadOptions,
+                averageBytesPerSecond: nil)!
+                    
+            let tileRegionDownload = tileStore.loadTileRegion(forId: region.identifier, loadOptions: tileRegionLoadOptions) { [weak self] progress in
+                // Closure gets called from the TileStore thread, so we need to dispatch to the main queue to update the UI.
+                DispatchQueue.main.async {
+                    guard let progress = progress,
+                          let tileRegionProgressView = self?.tileRegionProgressView
+                    else {
+                        return
+                    }
+                    // Update tile region progress bar
+                    tileRegionProgressView.progress = Float(progress.completedResourceCount)/Float(progress.requiredResourceCount)
+    //                self?.state = .downloading
                 }
-                // Update tile region progress bar
-                tileRegionProgressView.progress = Float(progress.completedResourceCount)/Float(progress.requiredResourceCount)
-//                self?.state = .downloading
+            } completion: { result in
+                // Confirm successful download.
+                switch result {
+                case .success(let region):
+                    print("\(region.id) downloaded!")
+                case .failure(let error):
+                    print("Error while updating outdated regions: \(error).")
+                }
             }
-        } completion: { result in
-            // Confirm successful download.
-            switch result {
-            case .success(let region):
-                print("Tile \(region.id) downloaded!")
-            case .failure(let error):
-                print("Error while updating outdated regions: \(error).")
-            }
+            downloads.append(tileRegionDownload)
         }
-        downloads = [stylePackDownload, tileRegionDownload]
         self.state = .downloaded
     }
     
-//    func cancelDownloads() {
-//        downloads.forEach { $0.cancel() }
-//    }
-    
-    func showDownloadedRegions() {
-        
-    }
-
     func listOfflineRegions() -> [TileRegion] {
         var tiles: [TileRegion] = []
         
@@ -272,33 +299,16 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         return tiles
     }
 
-    // Updating a region is done by the same scenario as downloading a new one
-    func refreshOutdatedOfflineRegions() {
-        // refresh all existing regions
-        let tiles = listOfflineRegions()
-        let tileLoadOptions = TileLoadOptions(
-            criticalPriority: false,
-            acceptExpired: true,
-            networkRestriction: .none)
-        
-        tiles.forEach { tile in
-            let tileRegionLoadOptions = TileRegionLoadOptions(
-                geometry: MBXGeometry(coordinate: washingtonDCCoord),
-                tileLoadOptions: tileLoadOptions)!
-            
-            tileStore.loadTileRegion(forId: tile.id, loadOptions: tileRegionLoadOptions, completion: { result in
-                switch result {
-                case .success(let region):
-                    print("Tile \(region.id) updated!")
-                case .failure(let error):
-                    print("Error while updating outdated regions: \(error).")
-                }
-            })
-        }
+    func removeOfflineRegion() {
+        tileStore.removeTileRegion(forId: dcRegionIdentifier)
+        print("DC Region removed!")
     }
-
-    func removeOfflineRegion(for tile: TileRegion) {
-        tileStore.removeTileRegion(forId: tile.id)
+    
+    func showDownloadedRegions() {
+        let tileRegions = listOfflineRegions()
+        tileRegions.forEach { tile in
+            print("Region: \(tile.id)")
+        }
     }
     
 // MARK: NavigationMapView Methods
@@ -309,6 +319,8 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         
     func showNavigationMapView() {
         downloadRegionsView.isHidden = true
+        stylePackProgressView.isHidden = true
+        tileRegionProgressView.isHidden = true
             
         navigationMapView = NavigationMapView(frame: view.bounds)
         navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -321,7 +333,12 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         navigationViewportDataSource.followingMobileCamera.zoom = 12.0
         navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
         
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        navigationMapView.addGestureRecognizer(gesture)
+        
         view.addSubview(navigationMapView)
+        setupRefreshRegionsBarButtonItem()
+        setupStartButton()
     }
     @objc func tappedStartButton(_ button: UIButton) {
         guard let route = currentRoute, let navigationRouteOptions = navigationRouteOptions else { return }
@@ -377,22 +394,12 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
             switch(oldValue, state) {
             case(_, .initial):
              print("Example started!")
-//            case (.initial, .downloading):
-//                // Add ability to cancel download
-//                print()
-//                stateButton.setTitle("Cancel Download", for: .normal)
-//            case (.downloading, .downloaded):
-//                // Be able to display NavigationMapView
-//                enableShowNavigationMapView()
             case (.initial, .downloaded):
-                // Add ability to cancel download
-                print()
                 enableShowNavigationMapView()
             case (.downloaded, .showingNavigationMapView):
                 showNavigationMapView()
             case (.showingNavigationMapView, .finished):
                 print()
-//                stateButton.setTitle("Reset", for: .normal)
             default:
                 fatalError("Invalid transition from \(oldValue) to \(state).")
             }
@@ -404,16 +411,11 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         case .beforeExampleSelected:
             state = .initial
         case .initial:
-            print("!!! INITIAL STATE")
             downloadOfflineRegions()
-//        case .downloading:
-//            cancelDownloads()
-//            state = .downloaded
         case .downloaded:
-            print("!!! DOWNLOADED STATE")
             state = .showingNavigationMapView
         case .showingNavigationMapView:
-            showDownloadedRegions()
+            print("Select action")
         case .finished:
             state = .initial
         }
