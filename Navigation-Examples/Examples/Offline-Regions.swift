@@ -8,6 +8,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
 
     var tileStore: TileStore!
     var resourceOptions: ResourceOptions!
+    var tilesetDescriptor: TilesetDescriptor!
     
     // Transition button, progress view
     var stateButton: UIButton!
@@ -70,7 +71,6 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
     enum State {
         case beforeExampleSelected
         case initial
-//        case downloading
         case downloaded
         case finished
         case showingNavigationMapView
@@ -159,7 +159,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         
         typealias ActionHandler = (UIAlertAction) -> Void
         
-        let listRegions: ActionHandler = { _ in self.showDownloadedRegions() }
+        let listRegions: ActionHandler = { _ in self.listDownloadedRegions() }
         let refreshDCRegion: ActionHandler = { _ in self.updateRegions() }
         let removeDCRegion: ActionHandler = { _ in self.removeOfflineRegion()}
         
@@ -184,15 +184,9 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
 // MARK: Offline Regions
     func updateRegions() {
         // Updating a region is done by the same scenario as downloading a new one
-        let tileLoadOptions = TileLoadOptions(
-            criticalPriority: false,
-            acceptExpired: true,
-            networkRestriction: .none)
-        
         let tileRegionLoadOptions = TileRegionLoadOptions(
-                geometry: MBXGeometry(coordinate: washingtonDCCoord),
-                tileLoadOptions: tileLoadOptions)!
-            
+            geometry: MBXGeometry(coordinate: washingtonDCCoord), descriptors: [tilesetDescriptor])!
+
             tileStore.loadTileRegion(forId: dcRegionIdentifier, loadOptions: tileRegionLoadOptions, completion: { result in
                 switch result {
                 case .success(let region):
@@ -210,7 +204,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         }
 
         // Create a TileStore instance at the default location
-        tileStore = TileStore.getInstance()
+        tileStore = TileStore.__getInstance()
         return ResourceOptions(accessToken: accessToken,
                                               tileStore: tileStore)
     }
@@ -218,7 +212,6 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
     func downloadOfflineRegions() {
         // Create style package
         let stylePackLoadOptions = StylePackLoadOptions(glyphsRasterizationMode: .ideographsRasterizedLocally, metadata: nil)!
-        
         
         let stylePackDownload = offlineManager.loadStylePack(for: .streets, loadOptions: stylePackLoadOptions) { [weak self] progress in
             // update UI
@@ -244,19 +237,14 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         
         // Create offline regions with tiles
         let navigationOptions = TilesetDescriptorOptions(styleURI: .streets, zoomRange: 0...10)
-        let navigationDescriptor = offlineManager.createTilesetDescriptor(for: navigationOptions)
+        tilesetDescriptor = offlineManager.createTilesetDescriptor(for: navigationOptions)
         
         // Load tile region
-        let tileLoadOptions = TileLoadOptions(
-            criticalPriority: false,
-            acceptExpired: true,
-            networkRestriction: .none)
         tileAreas.forEach { region in
             let tileRegionLoadOptions = TileRegionLoadOptions(
                 geometry: MBXGeometry(coordinate: region.coordinates),
-                descriptors: [navigationDescriptor],
+                descriptors: [tilesetDescriptor],
                 metadata: nil,
-                tileLoadOptions: tileLoadOptions,
                 averageBytesPerSecond: nil)!
                     
             let tileRegionDownload = tileStore.loadTileRegion(forId: region.identifier, loadOptions: tileRegionLoadOptions) { [weak self] progress in
@@ -269,7 +257,6 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
                     }
                     // Update tile region progress bar
                     tileRegionProgressView.progress = Float(progress.completedResourceCount)/Float(progress.requiredResourceCount)
-    //                self?.state = .downloading
                 }
             } completion: { result in
                 // Confirm successful download.
@@ -304,11 +291,17 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
         print("DC Region removed!")
     }
     
-    func showDownloadedRegions() {
-        let tileRegions = listOfflineRegions()
-        tileRegions.forEach { tile in
-            print("Region: \(tile.id)")
-        }
+    func listDownloadedRegions() {
+        tileStore.allTileRegions(completion: { result in
+            do {
+                let tiles = try result.get()
+                tiles.forEach { tile in
+                    print("Region: \(tile.id)")
+                }
+            } catch {
+                print("Error listing offline regions: \(error).")
+            }
+        })
     }
     
 // MARK: NavigationMapView Methods
@@ -324,9 +317,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
             
         navigationMapView = NavigationMapView(frame: view.bounds)
         navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        navigationMapView.mapView.update {
-            $0.location.puckType = .puck2D()
-        }
+        navigationMapView.mapView.location.options.puckType = .puck2D()
 
         let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
         navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
@@ -399,7 +390,7 @@ class OfflineRegionsViewController: UIViewController, NavigationViewControllerDe
             case (.downloaded, .showingNavigationMapView):
                 showNavigationMapView()
             case (.showingNavigationMapView, .finished):
-                print()
+                print("Example finished!")
             default:
                 fatalError("Invalid transition from \(oldValue) to \(state).")
             }
