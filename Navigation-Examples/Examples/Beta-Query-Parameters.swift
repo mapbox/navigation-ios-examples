@@ -8,7 +8,6 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
     
     var navigationMapView: NavigationMapView!
     var navigationRouteOptions: MopedRouteOptions!
-    //        let options = MopedRouteOptions(coordinates: [origin, destination], profileIdentifier: .automobile)
     
     var routes: [Route]? {
         didSet {
@@ -35,17 +34,12 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         navigationMapView = NavigationMapView(frame: view.bounds)
         navigationMapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         navigationMapView.delegate = self
-        navigationMapView.mapView.update {
-            $0.location.puckType = .puck2D()
-        }
+        navigationMapView.mapView.location.options.puckType = .puck2D()
         
-        // TODO: Provide a reliable way of setting camera to current coordinate.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            if let coordinate = self.navigationMapView.mapView.location.latestLocation?.coordinate {
-                let cameraOptions = CameraOptions(center: coordinate, zoom: 13.0)
-                self.navigationMapView.mapView.camera.setCamera(to: cameraOptions)
-            }
-        }
+        let navigationViewportDataSource = NavigationViewportDataSource(navigationMapView.mapView, viewportDataSourceType: .raw)
+        navigationViewportDataSource.options.followingCameraOptions.zoomUpdatesAllowed = false
+        navigationViewportDataSource.followingMobileCamera.zoom = 13.0
+        navigationMapView.navigationCamera.viewportDataSource = navigationViewportDataSource
         
         view.addSubview(navigationMapView)
 
@@ -114,7 +108,6 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         guard let route = routes?.first, let navigationRouteOptions = navigationRouteOptions else { return }
 
         // For demonstration purposes, simulate locations if the Simulate Navigation option is on.
-
         let navigationService = MapboxNavigationService(route: route,
                                                         routeIndex: 0,
                                                         routeOptions: navigationRouteOptions,
@@ -130,7 +123,7 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
     
     @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .ended else { return }
-        let location = navigationMapView.mapView.coordinate(for: gesture.location(in: navigationMapView.mapView))
+        let location = navigationMapView.mapView.mapboxMap.coordinate(for: gesture.location(in: navigationMapView.mapView))
         
         requestRoute(destination: location)
     }
@@ -140,9 +133,7 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         let userWaypoint = Waypoint(location: userLocation.internalLocation, heading: userLocation.heading, name: "user")
         let destinationWaypoint = Waypoint(coordinate: destination)
         let navigationRouteOptions = MopedRouteOptions(waypoints: [userWaypoint, destinationWaypoint], departTime: dateTextField.text!)
-        
-        print("!!! navigationRouteOptions: \(navigationRouteOptions)")
-        
+                
         Directions.shared.calculate(navigationRouteOptions) { [weak self] (session, result) in
             switch result {
             case .failure(let error):
@@ -170,30 +161,11 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
 class MopedRouteOptions: NavigationRouteOptions {
     var departureTime: String!
     
+    // add departureTime to URLQueryItems
     override var urlQueryItems: [URLQueryItem] {
-        let maxSpeed = Measurement(value: 30, unit: UnitSpeed.milesPerHour)
-        let maxSpeedString = String(maxSpeed.converted(to: .kilometersPerHour).value)
-        // URLQueryItem(name: "maxspeed", value: String(maximumSpeed.converted(to: .kilometersPerHour).value)),
-        let items = [URLQueryItem(name: "depart_at", value: departureTime), URLQueryItem(name: "maxspeed", value: maxSpeedString)]
-        print("!!! departure time: \(String(describing: departureTime))")
-        if var queryItems = super.urlQueryItems as [URLQueryItem]? {
-            print("!!! queryItems: \(queryItems)")
-            print()
-            print("!!! queryItems + items: \(queryItems + items)")
-            print("!!! QUERYITEMS !!!")
-            for element in queryItems {
-                print(element.name, element.value)
-            }
-            print()
-            print("!!! QUERYITEMS + ITEMS")
-            for element1 in queryItems + items {
-                print(element1.name, " = ", element1.value)
-            }
-//            let i = queryItems.firstIndex(where: { $0.name == "maxSpeed" })
-//            queryItems[i!].value = maxSpeedString
-//            queryItems.filter({ $0.name == "maxspeed"}).first?.value = maxSpeedString
-//            queryItems["maxspeed"].value = maximumSpeed
-            return queryItems + items
+        let item = [URLQueryItem(name: "depart_at", value: departureTime)]
+        if let queryItems = super.urlQueryItems as [URLQueryItem]? {
+            return queryItems + item
         }
     }
     
