@@ -56,14 +56,7 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         startButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         view.setNeedsLayout()
         
-        dateTextField = UITextField(frame: CGRect(x: 75, y: 100, width: 200, height: 35))
-        dateTextField.placeholder = "Select departure time"
-        dateTextField.backgroundColor = UIColor.white
-        dateTextField.borderStyle = .roundedRect
-        dateTextField.center.x = view.center.x
-        dateTextField.isHidden = false
-        showDatePicker()
-        view.addSubview(dateTextField)
+        setupDateProperties()
     }
     
     // Override layout lifecycle callback to be able to style the start button.
@@ -73,6 +66,17 @@ class BetaQueryViewController: UIViewController, NavigationMapViewDelegate, Navi
         startButton.layer.cornerRadius = startButton.bounds.midY
         startButton.clipsToBounds = true
         startButton.setNeedsDisplay()
+    }
+    
+    func setupDateProperties() {
+        dateTextField = UITextField(frame: CGRect(x: 75, y: 100, width: 200, height: 35))
+        dateTextField.placeholder = "Select departure time"
+        dateTextField.backgroundColor = UIColor.white
+        dateTextField.borderStyle = .roundedRect
+        dateTextField.center.x = view.center.x
+        dateTextField.isHidden = false
+        showDatePicker()
+        view.addSubview(dateTextField)
     }
 
     func showDatePicker() {
