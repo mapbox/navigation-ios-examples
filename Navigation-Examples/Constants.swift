@@ -57,6 +57,13 @@ let listOfExamples: [NamedController] = [
         pushExampleToViewController: false
     ),
     (
+        name: "Directions API beta query parameters",
+        description: "Demonstrates how to subclass NavigationRouteOptions to take advantage of the beta query parameters available from the Directions API.",
+        controller: BetaQueryViewController.self,
+        storyboard: nil,
+        pushExampleToViewController: true
+    ),
+    (
         name: "Custom Waypoint Styling",
         description: "Demonstrates how to customize waypoint styling.",
         controller: CustomWaypointsViewController.self,

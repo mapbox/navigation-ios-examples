@@ -35,6 +35,7 @@
 		B40ADDC9ABB7E7F6703997CA /* Pods_DocsCode.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B796D93B6E7934BFD326FA8 /* Pods_DocsCode.framework */; };
 		B480E424261E4C3500C16FA0 /* Predictive-Caching.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480E423261E4C3500C16FA0 /* Predictive-Caching.swift */; };
 		B480E428261E4C4600C16FA0 /* Route-Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480E427261E4C4600C16FA0 /* Route-Alerts.swift */; };
+		C346744E263C57610068A65E /* Beta-Query-Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = C346744D263C57610068A65E /* Beta-Query-Parameters.swift */; };
 		C3893F1C25F96BDC0058A987 /* Custom-Waypoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3893F1B25F96BDC0058A987 /* Custom-Waypoints.swift */; };
 		C52BAA782040D5030086EC6B /* Custom-Destination-Marker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52BAA772040D5030086EC6B /* Custom-Destination-Marker.swift */; };
 		C58FB85A1FE899B800C4B491 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58FB8591FE899B800C4B491 /* AppDelegate.swift */; };
@@ -87,6 +88,7 @@
 		B480E423261E4C3500C16FA0 /* Predictive-Caching.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Predictive-Caching.swift"; sourceTree = "<group>"; };
 		B480E427261E4C4600C16FA0 /* Route-Alerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Route-Alerts.swift"; sourceTree = "<group>"; };
 		BFEC70FB9C884A4DDD80E7D9 /* Pods-Navigation-Examples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation-Examples.release.xcconfig"; path = "Pods/Target Support Files/Pods-Navigation-Examples/Pods-Navigation-Examples.release.xcconfig"; sourceTree = "<group>"; };
+		C346744D263C57610068A65E /* Beta-Query-Parameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Beta-Query-Parameters.swift"; sourceTree = "<group>"; };
 		C3893F1B25F96BDC0058A987 /* Custom-Waypoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Custom-Waypoints.swift"; sourceTree = "<group>"; };
 		C52BAA772040D5030086EC6B /* Custom-Destination-Marker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Custom-Destination-Marker.swift"; sourceTree = "<group>"; };
 		C58FB8561FE899B800C4B491 /* Navigation-Examples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Navigation-Examples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -254,6 +256,7 @@
 				8DF510731FEB08F70049DB9C /* Embedded-Navigation.swift */,
 				8D6D36A620001F0400C2B61B /* EmbeddedExamples.storyboard */,
 				C5F130A51FEB2D7800463E86 /* Advanced.swift */,
+				C346744D263C57610068A65E /* Beta-Query-Parameters.swift */,
 				C59094C2203E3B9100EB2417 /* Custom-Voice-Controller.swift */,
 				C52BAA772040D5030086EC6B /* Custom-Destination-Marker.swift */,
 				C5C0D63720589422003A3B1D /* Custom-Server.swift */,
@@ -611,6 +614,7 @@
 				C5C0D63820589422003A3B1D /* Custom-Server.swift in Sources */,
 				C3893F1C25F96BDC0058A987 /* Custom-Waypoints.swift in Sources */,
 				8A31388726402DF400763714 /* Navigation-From-Segue.swift in Sources */,
+				C346744E263C57610068A65E /* Beta-Query-Parameters.swift in Sources */,
 				2B521D4E24090A3A00984CF8 /* CustomBarsViewController.swift in Sources */,
 				8A96379C2492B366008DEF2A /* Route-Deserialization.swift in Sources */,
 				2B521D502409240E00984CF8 /* CustomBottomBannerView.swift in Sources */,
