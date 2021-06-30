@@ -153,5 +153,12 @@ let listOfExamples: [NamedController] = [
         controller: SegueViewController.self,
         storyboard: UIStoryboard(name: "CustomSegue", bundle: nil),
         pushExampleToViewController: true
+    ),
+    (
+        name: "Offline Regions",
+        description: "Demonstrates how to create a custom TileStore and handle offline regions.",
+        controller: OfflineRegionsViewController.self,
+        storyboard: nil,
+        pushExampleToViewController: true
     )
 ]
